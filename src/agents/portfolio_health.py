@@ -17,7 +17,7 @@ DISCLAIMER = (
 )
 
 BENCHMARKS = {
-    "USD": "^GSPC",    # S&P 500
+    "USD": "SPY",      # S&P 500 ETF
     "GBP": "^FTSE",    # FTSE 100
     "EUR": "^STOXX50E", # Euro Stoxx 50
     "JPY": "^N225",    # Nikkei 225
@@ -80,7 +80,7 @@ async def run_logic(user: UserProfile, llm=None) -> PortfolioHealthOutput:
 
     # 3. Benchmark Comparison
     base_curr = user.base_currency
-    benchmark_ticker = BENCHMARKS.get(base_curr, "^GSPC")
+    benchmark_ticker = BENCHMARKS.get(base_curr, "SPY")
     
     benchmark_return_pct = 0.0
     try:
@@ -143,7 +143,7 @@ def handle_empty_portfolio(user: UserProfile) -> PortfolioHealthOutput:
         concentration_risk=ConcentrationRisk(top_position_pct=0, top_3_positions_pct=0, flag="low"),
         performance=Performance(total_return_pct=0, annualized_return_pct=0),
         benchmark_comparison=BenchmarkComparison(
-            benchmark=BENCHMARKS.get(user.base_currency, "^GSPC"),
+            benchmark=BENCHMARKS.get(user.base_currency, "SPY"),
             portfolio_return_pct=0,
             benchmark_return_pct=0,
             alpha_pct=0

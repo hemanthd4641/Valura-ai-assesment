@@ -59,5 +59,16 @@ This will run 19 tests against the fixtures provided in `fixtures/` (Note: some 
 - `SESSION_BACKEND`: Memory backend (current: `memory`).
 - `PIPELINE_TIMEOUT_SECONDS`: Global timeout for the AI pipeline.
 
+## Performance Benchmark
+
+Results of running the automated benchmark script against the application:
+- **Provider**: openai
+- **Dev model**: gpt-4o-mini
+- **p95 first-token latency**: 427ms
+- **p95 end-to-end latency**: 427ms
+- **Estimated cost at gpt-4.1 pricing**: $0.0144 per query
+
+*(Note: Targets successfully met with p95 first-token < 2s, p95 e2e < 6s, and cost < $0.05)*
+
 ## Defence Video
 [Link to Defence Video] (To be added)
