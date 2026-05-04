@@ -1,81 +1,57 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/SHM9MYZJ)
-# Valura AI — Team Lead Project Assignment
+# Valura AI Microservice
 
-You have been given access to this repository as part of the Valura AI team lead hiring process.
+Valura AI is a high-performance FastAPI microservice designed as the intelligence layer for a wealth management platform. It classifies user financial queries, routes them to specialized agents, and streams responses via Server-Sent Events (SSE).
 
-**Read [`ASSIGNMENT.md`](ASSIGNMENT.md) in full before writing a single line of code.**
+## Architecture Decisions
 
----
+### 1. Session Memory: In-Memory Implementation
+For this demonstration, I have implemented an **in-memory session store**. 
+- **Rationale**: Given the microservice requirements and the need for a fast, zero-dependency demo, in-memory storage provides sub-millisecond access times without the overhead of external database configuration.
+- **Production Upgrade Path**: The memory system is designed behind a `SessionMemory` protocol. Upgrading to a production-grade store like **Redis** or **PostgreSQL** would simply involve creating a new implementation of the protocol (e.g., `RedisSessionMemory`) and updating the dependency injection in `src/memory/session.py`.
 
-## What you're building
+### 2. LLM Orchestration
+- **Model**: Developed using `gpt-4o-mini` for cost-efficiency.
+- **Structured Output**: Using Pydantic models with OpenAI's structured output capabilities to ensure reliable parsing of intents and entities.
 
-An AI agent ecosystem that helps a novice investor **build, monitor, grow, and protect** their portfolio. See [`ASSIGNMENT.md`](ASSIGNMENT.md) for the full mission, scope, and constraints.
+### 3. Safety First
+A synchronous Safety Guard runs before any LLM calls, ensuring that harmful requests are blocked in under 10ms with specific, professional refusal messages.
 
----
+## Setup & Installation
 
-## Setup
+### Requirements
+- Python 3.11+
+- OpenAI API Key
 
-**Requirements:** Python 3.11+, an OpenAI API key.
+### Installation
+1. Clone the repository.
+2. Create a virtual environment and install dependencies:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   pip install -r requirements.txt
+   ```
+3. Configure environment variables:
+   ```bash
+   cp .env.example .env
+   # Edit .env and add your OPENAI_API_KEY
+   ```
 
-**Persistence is your choice.** Postgres, SQLite, or in-memory — pick one and defend it in your README. `DATABASE_URL` in `.env.example` is optional.
-
-**Streaming is required.** SSE only. Use `sse-starlette`, FastAPI's `StreamingResponse`, or roll your own — your call.
-
+## Running the Application
 ```bash
-git clone <your-classroom-repo-url>
-cd <repo-name>
-
-python -m venv venv
-source venv/bin/activate        # Linux/macOS
-venv\Scripts\activate           # Windows
-
-pip install -r requirements.txt
-
-cp .env.example .env
-# Fill in OPENAI_API_KEY
+uvicorn src.main:app --reload
 ```
 
-Use `gpt-4o-mini` while developing to keep costs down. Evaluation runs against `gpt-4.1`.
-
----
-
 ## Running Tests
-
 ```bash
 pytest tests/ -v
 ```
 
-Tests must pass without an `OPENAI_API_KEY` set — mock the LLM. We will run `pytest tests/ -v` on your repo.
+## Environment Variables
+- `OPENAI_API_KEY`: Your OpenAI API key.
+- `MODEL_DEV`: Model used for development (default: `gpt-4o-mini`).
+- `MODEL_EVAL`: Model used for evaluation (default: `gpt-4.1`).
+- `SESSION_BACKEND`: Memory backend (current: `memory`).
+- `PIPELINE_TIMEOUT_SECONDS`: Global timeout for the AI pipeline.
 
----
-
-## Repository Structure
-
-When you submit, your repository must contain:
-
-```
-README.md   ← overwrite this with your own (setup, decisions, library choices, video link)
-src/        ← all code
-tests/      ← all tests, must pass with pytest
-```
-
-`fixtures/`, `pytest.ini`, `requirements.txt`, `.env.example`, and `.github/` are part of the scaffold — leave them in place. Do not delete `ASSIGNMENT.md`.
-
----
-
-## Submission
-
-- Push commits **throughout** your work — we read the git log
-- Your `README.md` must:
-  - Explain how to run your code
-  - List every required environment variable
-  - Document the non-obvious decisions you made
-  - Link your defence video (≤ 10 min — see `ASSIGNMENT.md`)
-- Deadline: **3 days** from the date you accepted this assignment
-- Defence video: due within **24 hours** of your final commit
-
----
-
-## Environment
-
-You self-host everything. We do not provide credentials. See `.env.example` for the variables you'll need.
+## Defence Video
+[Link to Defence Video] (To be added)
