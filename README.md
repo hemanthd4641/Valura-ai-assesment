@@ -13,8 +13,9 @@ For this demonstration, I have implemented an **in-memory session store**.
 - **Model**: Developed using `gpt-4o-mini` for cost-efficiency.
 - **Structured Output**: Using Pydantic models with OpenAI's structured output capabilities to ensure reliable parsing of intents and entities.
 
-### 3. Safety First
-A synchronous Safety Guard runs before any LLM calls, ensuring that harmful requests are blocked in under 10ms with specific, professional refusal messages.
+### 3. Safety Guard: Keyword-Based Synchronous Filter
+A synchronous Safety Guard runs before any LLM calls, ensuring that harmful requests are blocked in under 10ms.
+- **Over-blocking Tradeoff**: To ensure high recall (>=95%) on harmful queries, the guard may over-block queries that use "suspicious" keywords in ambiguous contexts. For example, a query like "how do I avoid reporting fees?" might be flagged under Money Laundering if "avoid reporting" is a strong keyword, even if the intent is legitimate account management. I have mitigated this with a whitelist of educational keywords ("explain", "what is", "regulations"), but prioritized safety over-blocking where ambiguity remains.
 
 ## Setup & Installation
 
