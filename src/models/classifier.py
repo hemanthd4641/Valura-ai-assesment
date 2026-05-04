@@ -21,3 +21,19 @@ Entity Normalization Rules:
 - index: Exact match against canonical names (S&P 500, FTSE 100, NIKKEI 225, MSCI World)
 - action, goal, frequency, horizon, time_period: Exact match against vocabulary tokens
 """
+
+from pydantic import BaseModel
+
+class ExtractedEntities(BaseModel):
+    tickers: list[str] = []
+    amounts: list[float] = []
+    time_periods: list[str] = []
+    sectors: list[str] = []
+    topics: list[str] = []
+
+class ClassifierOutput(BaseModel):
+    intent: str
+    agent: str                  # must match an agent name from fixtures
+    entities: ExtractedEntities
+    safety_verdict: str         # "safe" | "caution" | "unsafe"  — informational only
+    confidence: float
