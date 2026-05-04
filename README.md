@@ -44,9 +44,13 @@ uvicorn src.main:app --reload
 ```
 
 ## Running Tests
+The comprehensive test suite uses mock LLM clients and covers safety, intent classification, entity normalization, portfolio health, and API routing. To run all tests without requiring an OpenAI API key:
+
 ```bash
-pytest tests/ -v
+python -m pytest tests/ -v
 ```
+
+This will run 19 tests against the fixtures provided in `fixtures/` (Note: some are skipped if they are stubs not required to be implemented in this assignment).
 
 ## Environment Variables
 - `OPENAI_API_KEY`: Your OpenAI API key.

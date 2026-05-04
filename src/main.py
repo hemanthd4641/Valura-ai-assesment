@@ -117,7 +117,7 @@ async def stream_pipeline(request: QueryRequest):
         
         yield {
             "event": "structured",
-            "data": json.dumps(agent_response, default=lambda x: x.dict() if hasattr(x, 'dict') else x)
+            "data": json.dumps(agent_response, default=lambda x: x.model_dump() if hasattr(x, 'model_dump') else x)
         }
 
         yield {"event": "done", "data": "{}"}

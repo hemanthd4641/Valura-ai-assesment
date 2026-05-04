@@ -10,7 +10,7 @@ class BaseStub:
         return {
             "status": "not_implemented",
             "classified_intent": classifier_output.intent,
-            "extracted_entities": classifier_output.entities.dict(),
+            "extracted_entities": classifier_output.entities.model_dump(),
             "agent": self.agent_name,
             "message": f"{self.agent_name.replace('_', ' ').title()} agent is not implemented in this build."
         }
