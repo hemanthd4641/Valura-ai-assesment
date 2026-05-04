@@ -8,6 +8,7 @@ Valura AI is a high-performance FastAPI microservice designed as the intelligenc
 For this demonstration, I have implemented an **in-memory session store**. 
 - **Rationale**: Given the microservice requirements and the need for a fast, zero-dependency demo, in-memory storage provides sub-millisecond access times without the overhead of external database configuration.
 - **Production Upgrade Path**: The memory system is designed behind a `SessionMemory` protocol. Upgrading to a production-grade store like **Redis** or **PostgreSQL** would simply involve creating a new implementation of the protocol (e.g., `RedisSessionMemory`) and updating the dependency injection in `src/memory/session.py`.
+- **Annualized Return Assumption**: Since the provided `Holding` model does not include purchase dates, the Portfolio Health agent currently assumes a 1-year holding period for its annualized return calculations. In a production system, this would be calculated using actual purchase timestamps.
 
 ### 2. LLM Orchestration
 - **Model**: Developed using `gpt-4o-mini` for cost-efficiency.
