@@ -11,7 +11,7 @@ For this demonstration, I have implemented an **in-memory session store**.
 
 ### 2. LLM Orchestration
 - **Model**: Developed using `gpt-4o-mini` for cost-efficiency.
-- **Structured Output**: Using Pydantic models with OpenAI's structured output capabilities to ensure reliable parsing of intents and entities.
+- **Structured Output**: Using OpenAI's `response_format={"type": "json_object"}`. This was chosen over function calling because it provides a simpler, more direct way to enforce the response schema while allowing for easy extraction of the JSON string for parsing into Pydantic models. It is natively supported by `gpt-4o-mini` and ensures 100% valid JSON responses.
 
 ### 3. Safety Guard: Keyword-Based Synchronous Filter
 A synchronous Safety Guard runs before any LLM calls, ensuring that harmful requests are blocked in under 10ms.
