@@ -1,42 +1,43 @@
 from typing import Any
-from src.models.classifier import ExtractedEntities
+from src.models.classifier import ClassifierOutput, ExtractedEntities
+from src.models.request import UserProfile
 
-def get_stub_response(agent_name: str, intent: str, entities: ExtractedEntities) -> dict[str, Any]:
-    """
-    Returns a structured 'not implemented' response for unimplemented agents.
-    """
-    return {
-        "status": "not_implemented",
-        "classified_intent": intent,
-        "extracted_entities": entities.dict(),
-        "agent": agent_name,
-        "message": f"{agent_name.replace('_', ' ').title()} agent is not implemented in this build."
-    }
+class BaseStub:
+    def __init__(self, agent_name: str):
+        self.agent_name = agent_name
 
-# Specific agent stubs if needed for the router to import
-async def handle_market_research(intent: str, entities: ExtractedEntities):
-    return get_stub_response("market_research", intent, entities)
+    async def run(self, classifier_output: ClassifierOutput, user: UserProfile) -> dict[str, Any]:
+        return {
+            "status": "not_implemented",
+            "classified_intent": classifier_output.intent,
+            "extracted_entities": classifier_output.entities.dict(),
+            "agent": self.agent_name,
+            "message": f"{self.agent_name.replace('_', ' ').title()} agent is not implemented in this build."
+        }
 
-async def handle_investment_strategy(intent: str, entities: ExtractedEntities):
-    return get_stub_response("investment_strategy", intent, entities)
+class MarketResearchStub(BaseStub):
+    def __init__(self): super().__init__("market_research")
 
-async def handle_financial_planning(intent: str, entities: ExtractedEntities):
-    return get_stub_response("financial_planning", intent, entities)
+class InvestmentStrategyStub(BaseStub):
+    def __init__(self): super().__init__("investment_strategy")
 
-async def handle_financial_calculator(intent: str, entities: ExtractedEntities):
-    return get_stub_response("financial_calculator", intent, entities)
+class FinancialPlanningStub(BaseStub):
+    def __init__(self): super().__init__("financial_planning")
 
-async def handle_risk_assessment(intent: str, entities: ExtractedEntities):
-    return get_stub_response("risk_assessment", intent, entities)
+class FinancialCalculatorStub(BaseStub):
+    def __init__(self): super().__init__("financial_calculator")
 
-async def handle_product_recommendation(intent: str, entities: ExtractedEntities):
-    return get_stub_response("product_recommendation", intent, entities)
+class RiskAssessmentStub(BaseStub):
+    def __init__(self): super().__init__("risk_assessment")
 
-async def handle_predictive_analysis(intent: str, entities: ExtractedEntities):
-    return get_stub_response("predictive_analysis", intent, entities)
+class ProductRecommendationStub(BaseStub):
+    def __init__(self): super().__init__("product_recommendation")
 
-async def handle_customer_support(intent: str, entities: ExtractedEntities):
-    return get_stub_response("customer_support", intent, entities)
+class PredictiveAnalysisStub(BaseStub):
+    def __init__(self): super().__init__("predictive_analysis")
 
-async def handle_general_query(intent: str, entities: ExtractedEntities):
-    return get_stub_response("general_query", intent, entities)
+class SupportStub(BaseStub):
+    def __init__(self): super().__init__("customer_support")
+
+class GeneralQueryStub(BaseStub):
+    def __init__(self): super().__init__("general_query")

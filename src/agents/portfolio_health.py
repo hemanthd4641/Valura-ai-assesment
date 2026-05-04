@@ -24,10 +24,14 @@ BENCHMARKS = {
     "SGD": "^STI",     # Straits Times Index
 }
 
-async def run(user: UserProfile, llm=None) -> PortfolioHealthOutput:
-    """
-    Runs the Portfolio Health Agent logic.
-    """
+class PortfolioHealthAgent:
+    async def run(self, classifier_output, user: UserProfile, llm=None) -> PortfolioHealthOutput:
+        """
+        Runs the Portfolio Health Agent logic.
+        """
+        return await run_logic(user, llm)
+
+async def run_logic(user: UserProfile, llm=None) -> PortfolioHealthOutput:
     if not user.portfolio:
         return handle_empty_portfolio(user)
 
