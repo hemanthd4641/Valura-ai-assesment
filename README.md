@@ -58,7 +58,7 @@ graph TD
     O --> P[SSE: Done]
 ```
 
-![Valura AI Architecture Diagram](file:///C:/Users/user/.gemini/antigravity/brain/639cc4a1-f640-4d78-adc5-f1fd254b35e8/valura_ai_architecture_diagram_1777953988578.png)
+![Valura AI Architecture Diagram](assets/architecture.png)
 
 **Failure Point Handling:**
 - **Safety Guard Failure:** If malicious intent is detected, the pipeline halts immediately (in <10ms). The classifier and agent are never invoked. A structured SSE `error` event is streamed back.
