@@ -11,7 +11,7 @@ INPUT_PRICE_PER_TOKEN = 10.0 / 1_000_000
 OUTPUT_PRICE_PER_TOKEN = 30.0 / 1_000_000
 
 NUM_REQUESTS = 20
-URL = "http://127.0.0.1:8000/chat"
+URL = "http://127.0.0.1:8001/chat"
 
 payload = {
     "query": "how is my portfolio doing? i have some apple and microsoft.",

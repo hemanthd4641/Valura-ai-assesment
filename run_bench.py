@@ -10,7 +10,7 @@ def main():
     env["MODEL_DEV"] = "gpt-4o-mini"
     
     server = subprocess.Popen(
-        [sys.executable, "-m", "uvicorn", "tests.bench_app:app", "--port", "8000"],
+        [sys.executable, "-m", "uvicorn", "tests.bench_app:app", "--port", "8001"],
         env=env
     )
     

@@ -37,6 +37,29 @@ The Valura AI platform processes requests sequentially to ensure strict safety a
 **Request Flow:**
 `HTTP Request` → `Safety Guard` → `Classifier` → `Router` → `Agent` → `SSE stream`
 
+```mermaid
+graph TD
+    A[User Query] --> B{Safety Guard}
+    B -- Blocked --> C[SSE: Error/Refusal]
+    B -- Safe --> D[Session Memory: Get History]
+    D --> E{Deduplication Cache}
+    E -- Hit --> F[Cached Classifier Output]
+    E -- Miss --> G[LLM Intent Classifier]
+    G --> H[Session Memory: Set Cache]
+    H --> I[Classifier Output]
+    F --> I
+    I --> J[Router]
+    J --> K{Specialist Agent}
+    K -- Portfolio Health --> L[Financial Logic + yfinance]
+    K -- Others --> M[Agent Stubs]
+    L --> N[SSE: Metadata + Tokens + Results]
+    M --> N
+    N --> O[Session Memory: Add Turn]
+    O --> P[SSE: Done]
+```
+
+![Valura AI Architecture Diagram](file:///C:/Users/user/.gemini/antigravity/brain/639cc4a1-f640-4d78-adc5-f1fd254b35e8/valura_ai_architecture_diagram_1777953988578.png)
+
 **Failure Point Handling:**
 - **Safety Guard Failure:** If malicious intent is detected, the pipeline halts immediately (in <10ms). The classifier and agent are never invoked. A structured SSE `error` event is streamed back.
 - **Classifier Failure:** If the LLM call times out or returns malformed JSON, the classifier catches the exception and returns a fallback `ClassifierOutput` directing the request to the `customer_support` agent. The system continues without crashing.
@@ -82,13 +105,14 @@ The Safety Guard is a high-speed, synchronous regex-based filter evaluating requ
 Results of running the automated benchmark script against the application:
 - **Provider**: openai
 - **Dev model**: gpt-4o-mini
-- **p50 first-token latency**: 409ms
-- **p95 first-token latency**: 427ms
-- **p50 end-to-end latency**: 409ms
-- **p95 end-to-end latency**: 427ms
+- **p50 first-token latency**: 417ms
+- **p95 first-token latency**: 432ms
+- **p50 end-to-end latency**: 417ms
+- **p95 end-to-end latency**: 432ms
 - **Estimated cost at gpt-4.1 pricing**: $0.0144 per query
 
 *(Targets successfully met: p95 first-token < 2s, p95 e2e < 6s, and cost < $0.05)*
+
 
 ## 9. What I'd Do Differently With More Time
 
@@ -96,6 +120,17 @@ Results of running the automated benchmark script against the application:
 2. **True Streaming Pipeline**: Currently, the agent awaits the full response from `yfinance` before emitting the first token. I would restructure the SSE pipeline so the system immediately emits "Analyzing your portfolio..." tokens while the financial data fetches in the background.
 3. **Database Integration**: I would fully wire up the `PostgresSessionMemory` utilizing Redis for fast session caching and PostgreSQL for persistent audit logs of safety violations.
 
-## 10. Video Link
+## 10. Optional Stretch Goal: Intra-Session Deduplication Cache
+
+I have implemented an **identical-query LLM dedupe cache** within the session memory.
+
+- **How it Works**: Before calling the expensive LLM classifier, the system checks if the exact same query (case-insensitive) has been successfully classified within the current session.
+- **Benefits**:
+    - **Zero Latency**: Repeated queries return a result instantly (0ms LLM time).
+    - **Cost Savings**: Prevents redundant API calls to `gpt-4o-mini`.
+    - **Deterministic Results**: Ensures that if a user asks the same question twice in the same context, they get a consistent routing experience.
+- **Implementation**: The cache is stored in-memory within the `InMemorySessionMemory` class and is cleared automatically when the session is cleared.
+
+## 11. Video Link
 
 [Link to unlisted YouTube Video]

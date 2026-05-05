@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 
 from src.models.request import QueryRequest
 from src.safety.guard import check as safety_check
-from src.classifier.intent import classify
+from src.classifier.intent import classify, ClassifierOutput
 from src.router import route
 from src.memory.session import get_session_memory
 
@@ -21,12 +21,11 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="Valura AI Microservice")
+from contextlib import asynccontextmanager
 
-PIPELINE_TIMEOUT = int(os.getenv("PIPELINE_TIMEOUT_SECONDS", 10))
-
-@app.on_event("startup")
-async def startup():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup logic
     required_vars = ["OPENAI_API_KEY", "MODEL_DEV"]
     missing = [var for var in required_vars if not os.getenv(var)]
     if missing:
@@ -34,6 +33,14 @@ async def startup():
     
     model = os.getenv("MODEL_DEV", "gpt-4o-mini")
     logger.info(f"Valura AI starting up. Using model: {model}")
+    
+    yield
+    # Shutdown logic (if any)
+
+app = FastAPI(title="Valura AI Microservice", lifespan=lifespan)
+
+PIPELINE_TIMEOUT = int(os.getenv("PIPELINE_TIMEOUT_SECONDS", 10))
+
 
 async def stream_pipeline(request: QueryRequest):
     """
@@ -57,21 +64,30 @@ async def stream_pipeline(request: QueryRequest):
             return
 
         # 2. Intent Classifier
-        # Get history from memory
-        history = memory.get_history(session_id, last_n=5)
-        
-        try:
-            classifier_output = await asyncio.wait_for(
-                classify(request.query, request.user, history),
-                timeout=PIPELINE_TIMEOUT
-            )
-        except asyncio.TimeoutError:
-            yield {
-                "event": "error",
-                "data": json.dumps({"code": "TIMEOUT", "message": "Classifier timed out"})
-            }
-            yield {"event": "done", "data": "{}"}
-            return
+        # Check cache first (Identical-query dedupe - Stretch goal)
+        cached_data = memory.get_cache(session_id, request.query)
+        if cached_data:
+            logger.info(f"Cache hit for session {session_id}")
+            classifier_output = ClassifierOutput(**cached_data)
+        else:
+            # Get history from memory
+            history = memory.get_history(session_id, last_n=5)
+            
+            try:
+                classifier_output = await asyncio.wait_for(
+                    classify(request.query, request.user, history),
+                    timeout=PIPELINE_TIMEOUT
+                )
+                # Store in cache
+                memory.set_cache(session_id, request.query, classifier_output.model_dump())
+            except asyncio.TimeoutError:
+                yield {
+                    "event": "error",
+                    "data": json.dumps({"code": "TIMEOUT", "message": "Classifier timed out"})
+                }
+                yield {"event": "done", "data": "{}"}
+                return
+
 
         # 3. Metadata Event
         yield {
